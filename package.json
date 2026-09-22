@@ -1,0 +1,7 @@
+{
+  "name": "inspire-colloquium-admin-panel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "INSPIRE Colloquium standalone admin frontend",
+  "scripts": { "test": "node scripts/validate.cjs" }
+}
