@@ -1,0 +1,95 @@
+// ============================================================================
+// INSPIRE Colloquium Admin Panel — Prisma Schema (SQLite & PostgreSQL Compatible)
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User Model ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("ADMIN")
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+// ─── Participant Model ──────────────────────────────────────────────────────
+
+model Participant {
+  id                 String    @id @default(cuid())
+  applicationSeqNo   String    @unique
+  deskToken          String?   @unique
+  name               String
+  email              String    @unique
+  phone              String?
+  collegeName        String
+  degree             String
+  academicCategory   String    @default("UG")
+  paperTitle         String
+  selectionStatus    String    @default("UNDER_REVIEW")
+  registrationStatus String    @default("APPLIED")
+  amountPaid         Float     @default(0)
+  transactionId      String?
+  remarks            String?
+  version            Int       @default(1)
+  lastReminderAt     DateTime?
+  
+  // Desk check-in fields
+  isCheckInCompleted Boolean   @default(false)
+  checkInTime        DateTime?
+  checkedInByUserId  String?
+  issuedKit          Boolean   @default(false)
+  issuedCertificate  Boolean   @default(false)
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("participants")
+}
+
+// ─── Audit Trail ────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String   @default("SYSTEM")
+  actorRole  String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// ─── System Settings ────────────────────────────────────────────────────────
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
